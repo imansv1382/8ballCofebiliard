@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Snooker Draw</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+tailwind.config = {
+    darkMode: 'class'
+}
+</script>
+
+<style>
+
+body {
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+.snooker-felt {
+    background:
+        radial-gradient(circle at 50% 40%,
+        rgba(34,197,94,.18),
+        transparent 55%),
+        linear-gradient(145deg,#064e3b,#022c22);
+}
+
+.dark .snooker-felt {
+    background:
+        radial-gradient(circle at 50% 40%,
+        rgba(34,197,94,.12),
+        transparent 55%),
+        linear-gradient(145deg,#022c22,#011510);
+}
+
+.snooker-table {
+    border: 8px solid #5b3218;
+
+    box-shadow:
+        inset 0 0 0 4px #8b572a,
+        0 15px 40px rgba(0,0,0,.35);
+}
+
+.ball {
+    width: 125px;
+    height: 125px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 70px;
+    font-weight: 900;
+
+    color: white;
+
+    border: 4px solid rgba(255,255,255,.35);
+
+    box-shadow:
+        inset -12px -14px 18px rgba(0,0,0,.35),
+        inset 8px 8px 14px rgba(255,255,255,.35),
+        0 12px 25px rgba(0,0,0,.4);
+
+    animation: appear .35s ease-out;
+}
+
+@keyframes appear {
+
+    from {
+        transform: scale(.6) rotate(-10deg);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1) rotate(0);
+        opacity: 1;
+    }
+
+}
+
+.btn {
+    transition:
+        transform .15s ease,
+        box-shadow .15s ease;
+}
+
+.btn:active {
+    transform: scale(.97);
+}
+
+.result-row {
+    animation: slideIn .3s ease-out;
+}
+
+@keyframes slideIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+.color-ball {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+    font-weight: 900;
+
+    box-shadow:
+        inset -5px -6px 8px rgba(0,0,0,.35),
+        inset 3px 3px 5px rgba(255,255,255,.3),
+        0 4px 8px rgba(0,0,0,.25);
+}
+
+</style>
+
+</head>
+
+
+<body class="
+min-h-screen
+transition-colors
+duration-300
+bg-slate-100
+text-slate-900
+dark:bg-slate-950
+dark:text-white
+">
+
+
+<div class="min-h-screen flex items-center justify-center p-4">
+
+<div class="w-full max-w-md">
+
+
+<!-- HEADER -->
+
+<div class="flex items-center justify-between mb-4">
+
+<div>
+
+<div class="flex items-center gap-2">
+
+<span class="text-3xl">🎱</span>
+
+<h1 class="text-2xl font-black">
+Snooker Draw
+</h1>
+
+</div>
+
+<p class="
+text-xs
+mt-1
+text-slate-500
+dark:text-slate-400
+">
+قرعه‌کشی اعداد ۲ تا ۷
+</p>
+
+</div>
+
+
+<button
+onclick="toggleTheme()"
+class="
+btn
+w-11
+h-11
+rounded-full
+flex
+items-center
+justify-center
+bg-white
+dark:bg-slate-800
+shadow-md
+border
+border-slate-200
+dark:border-slate-700
+">
+
+<span id="themeIcon">🌙</span>
+
+</button>
+
+</div>
+
+
+
+<!-- NAME INPUT -->
+
+<div class="
+mb-4
+p-4
+rounded-2xl
+bg-white
+dark:bg-slate-900
+border
+border-slate-200
+dark:border-slate-800
+shadow-sm
+">
+
+<label class="
+block
+text-sm
+font-bold
+mb-2
+">
+
+نام نفر فعلی
+<span class="text-xs font-normal text-slate-400">
+(اختیاری)
+</span>
+
+</label>
+
+
+<input
+id="personName"
+type="text"
+placeholder="مثلاً علی"
+maxlength="30"
+class="
+w-full
+px-4
+py-3
+rounded-xl
+outline-none
+bg-slate-100
+dark:bg-slate-800
+border
+border-slate-200
+dark:border-slate-700
+focus:border-emerald-500
+transition
+"
+/>
+
+<p class="
+text-xs
+text-slate-400
+mt-2
+">
+
+اگر نام وارد نکنید، نفر به‌صورت خودکار شماره‌گذاری می‌شود.
+
+</p>
+
+</div>
+
+
+
+<!-- SNOOKER TABLE -->
+
+<div class="
+snooker-felt
+snooker-table
+rounded-[28px]
+p-5
+text-white
+relative
+overflow-hidden
+">
+
+
+<!-- POCKETS -->
+
+<div class="
+absolute top-1 left-1
+w-5 h-5
+rounded-full
+bg-black
+opacity-80
+"></div>
+
+<div class="
+absolute top-1 right-1
+w-5 h-5
+rounded-full
+bg-black
+opacity-80
+"></div>
+
+<div class="
+absolute bottom-1 left-1
+w-5 h-5
+rounded-full
+bg-black
+opacity-80
+"></div>
+
+<div class="
+absolute bottom-1 right-1
+w-5 h-5
+rounded-full
+bg-black
+opacity-80
+"></div>
+
+
+
+<!-- STATUS -->
+
+<div class="text-center mb-4">
+
+<span
+id="message"
+class="
+inline-block
+px-4
+py-1.5
+rounded-full
+bg-black/20
+backdrop-blur
+text-sm
+">
+
+نوبت نفر اول است
+
+</span>
+
+</div>
+
+
+
+<!-- BALL -->
+
+<div class="
+h-44
+flex
+items-center
+justify-center
+">
+
+<div id="number"></div>
+
+</div>
+
+
+
+<!-- CONFIRM -->
+
+<button
+id="confirmButton"
+onclick="confirmNumber()"
+disabled
+class="
+btn
+w-full
+py-3
+rounded-xl
+bg-amber-400
+hover:bg-amber-300
+text-amber-950
+font-black
+shadow-lg
+disabled:opacity-30
+disabled:cursor-not-allowed
+">
+
+✓ متوجه شدم
+
+</button>
+
+</div>
+
+
+
+<!-- BUTTONS -->
+
+<div class="grid grid-cols-2 gap-3 mt-4">
+
+
+<button
+id="drawButton"
+onclick="drawNumber()"
+class="
+btn
+col-span-2
+py-4
+rounded-2xl
+bg-emerald-600
+hover:bg-emerald-500
+text-white
+font-black
+text-lg
+shadow-lg
+">
+
+🎱 نمایش عدد
+
+</button>
+
+
+
+<button
+onclick="showAllNumbers()"
+class="
+btn
+py-3
+rounded-xl
+bg-blue-600
+hover:bg-blue-500
+text-white
+font-bold
+">
+
+👥 همه افراد
+
+</button>
+
+
+
+<button
+onclick="resetGame()"
+class="
+btn
+py-3
+rounded-xl
+bg-slate-200
+hover:bg-slate-300
+text-slate-800
+dark:bg-slate-800
+dark:hover:bg-slate-700
+dark:text-white
+font-bold
+">
+
+↻ ریست
+
+</button>
+
+</div>
+
+
+
+<!-- RESULTS -->
+
+<div id="result" class="mt-5"></div>
+
+
+
+<div class="
+text-center
+mt-5
+text-xs
+text-slate-400
+">
+
+هر عدد فقط یک‌بار استفاده می‌شود 🎱
+
+</div>
+
+
+</div>
+
+</div>
+
+
+
+<script>
+
+
+/* =========================
+   GAME DATA
+========================= */
+
+var numbers = [2,3,4,5,6,7];
+
+var selectedNumbers = [];
+
+var currentNumber = null;
+
+var personNumber = 1;
+
+
+/* =========================
+   RANDOM BALL COLORS
+========================= */
+
+var ballColors = [
+
+    "#dc2626", // قرمز
+    "#2563eb", // آبی
+    "#16a34a", // سبز
+    "#facc15", // زرد
+    "#9333ea", // بنفش
+    "#ea580c", // نارنجی
+    "#ec4899", // صورتی
+    "#0891b2", // فیروزه‌ای
+    "#7c3aed", // بنفش روشن
+    "#be123c"  // سرخابی
+
+];
+
+
+function getRandomColor() {
+
+    var index =
+        Math.floor(Math.random() * ballColors.length);
+
+    return ballColors[index];
+
+}
+
+
+/* =========================
+   DRAW NUMBER
+========================= */
+
+function drawNumber() {
+
+
+    if (currentNumber !== null) {
+        return;
+    }
+
+
+    if (numbers.length === 0) {
+
+        document.getElementById("message").innerText =
+            "همه افراد عدد خود را دریافت کرده‌اند.";
+
+        document.getElementById("drawButton").disabled =
+            true;
+
+        return;
+    }
+
+
+    /*
+       گرفتن اسم
+    */
+
+    var name =
+        document.getElementById("personName").value.trim();
+
+
+    if (name === "") {
+
+        name =
+            "نفر " + personNumber;
+
+    }
+
+
+    /*
+       انتخاب عدد تصادفی
+    */
+
+    var randomIndex =
+        Math.floor(Math.random() * numbers.length);
+
+
+    currentNumber =
+        numbers[randomIndex];
+
+
+    /*
+       حذف عدد از لیست
+    */
+
+    numbers.splice(randomIndex,1);
+
+
+    /*
+       انتخاب رنگ تصادفی
+    */
+
+    var color =
+        getRandomColor();
+
+
+    /*
+       ذخیره اطلاعات
+    */
+
+    selectedNumbers.push({
+
+        person:
+            personNumber,
+
+        name:
+            name,
+
+        number:
+            currentNumber,
+
+        color:
+            color
+
+    });
+
+
+    /*
+       نمایش توپ
+    */
+
+    document.getElementById("number").innerHTML =
+
+        '<div class="ball" style="background:' +
+        color +
+        ';">' +
+
+        currentNumber +
+
+        '</div>';
+
+
+    /*
+       پیام
+    */
+
+    document.getElementById("message").innerText =
+        name + " — عدد شما";
+
+
+    /*
+       دکمه نمایش عدد غیرفعال
+    */
+
+    document.getElementById("drawButton").disabled =
+        true;
+
+
+    /*
+       فعال کردن متوجه شدم
+    */
+
+    document.getElementById("confirmButton").disabled =
+        false;
+
+}
+
+
+
+/* =========================
+   CONFIRM
+========================= */
+
+function confirmNumber() {
+
+
+    if (currentNumber === null) {
+        return;
+    }
+
+
+    /*
+       پاک کردن توپ
+    */
+
+    document.getElementById("number").innerHTML =
+        "";
+
+
+    currentNumber = null;
+
+
+    /*
+       رفتن به نفر بعد
+    */
+
+    personNumber++;
+
+
+    /*
+       پاک کردن اسم
+    */
+
+    document.getElementById("personName").value =
+        "";
+
+
+    /*
+       غیرفعال کردن تایید
+    */
+
+    document.getElementById("confirmButton").disabled =
+        true;
+
+
+    if (numbers.length > 0) {
+
+
+        document.getElementById("drawButton").disabled =
+            false;
+
+
+        document.getElementById("message").innerText =
+            "نوبت نفر " + personNumber + " است";
+
+
+    } else {
+
+
+        document.getElementById("drawButton").disabled =
+            true;
+
+
+        document.getElementById("message").innerText =
+            "🎉 قرعه‌کشی تمام شد";
+
+    }
+
+}
+
+
+
+/* =========================
+   SHOW ALL
+========================= */
+
+function showAllNumbers() {
+
+
+    var result =
+        document.getElementById("result");
+
+
+    if (selectedNumbers.length === 0) {
+
+
+        result.innerHTML = `
+
+        <div class="
+        p-4
+        rounded-2xl
+        bg-white
+        dark:bg-slate-900
+        border
+        border-slate-200
+        dark:border-slate-800
+        text-center
+        text-slate-500
+        dark:text-slate-400
+        ">
+
+        هنوز هیچ عددی انتخاب نشده است.
+
+        </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    var html = `
+
+    <div class="
+    rounded-2xl
+    overflow-hidden
+    bg-white
+    dark:bg-slate-900
+    border
+    border-slate-200
+    dark:border-slate-800
+    shadow-lg
+    ">
+
+    <div class="
+    px-4
+    py-3
+    font-black
+    border-b
+    border-slate-200
+    dark:border-slate-800
+    ">
+
+    📋 نتیجه قرعه‌کشی
+
+    </div>
+
+    <div class="p-3">
+
+    `;
+
+
+    for (
+        var i = 0;
+        i < selectedNumbers.length;
+        i++
+    ) {
+
+
+        var item =
+            selectedNumbers[i];
+
+
+        html += `
+
+        <div class="
+        result-row
+        flex
+        items-center
+        justify-between
+        p-3
+        mb-2
+        last:mb-0
+        rounded-xl
+        bg-slate-100
+        dark:bg-slate-800
+        ">
+
+
+        <div class="flex items-center gap-3">
+
+
+            <div>
+
+                <div class="font-bold">
+
+                    ${item.name}
+
+                </div>
+
+                <div class="
+                text-xs
+                text-slate-400
+                ">
+
+                    نفر ${item.person}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <div
+        class="color-ball"
+        style="background:${item.color};"
+        >
+
+            ${item.number}
+
+        </div>
+
+
+        </div>
+
+        `;
+
+    }
+
+
+    html += `
+
+    </div>
+
+    </div>
+
+    `;
+
+
+    result.innerHTML =
+        html;
+
+}
+
+
+
+/* =========================
+   RESET
+========================= */
+
+function resetGame() {
+
+
+    numbers =
+        [2,3,4,5,6,7];
+
+
+    selectedNumbers =
+        [];
+
+
+    currentNumber =
+        null;
+
+
+    personNumber =
+        1;
+
+
+    document.getElementById("number").innerHTML =
+        "";
+
+
+    document.getElementById("result").innerHTML =
+        "";
+
+
+    document.getElementById("personName").value =
+        "";
+
+
+    document.getElementById("message").innerText =
+        "نوبت نفر اول است";
+
+
+    document.getElementById("drawButton").disabled =
+        false;
+
+
+    document.getElementById("confirmButton").disabled =
+        true;
+
+}
+
+
+
+/* =========================
+   DARK / LIGHT
+========================= */
+
+function toggleTheme() {
+
+
+    document.documentElement.classList.toggle("dark");
+
+
+    var isDark =
+        document.documentElement.classList.contains("dark");
+
+
+    document.getElementById("themeIcon").innerText =
+        isDark ? "☀️" : "🌙";
+
+
+    localStorage.setItem(
+        "snooker-theme",
+        isDark ? "dark" : "light"
+    );
+
+}
+
+(function() {
+    var savedTheme =
+        localStorage.getItem("snooker-theme");
+    if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+        document.getElementById("themeIcon").innerText =
+            "☀️";
+    }
+})();
+</script>
+</body>
+
+</html>
